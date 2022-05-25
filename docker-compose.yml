@@ -1,0 +1,60 @@
+version: "3"
+services:
+
+  jaeger-tracing:
+    image: jaegertracing/all-in-one:1.31
+    command: ["--reporter.grpc.host-port=localhost:14250"]
+    environment:
+      - TZ=Europe/Amsterdam
+    ports:
+      - 16686:16686
+      - 14268:14268
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 9411:9411
+    networks:
+      ebms-core_network:
+        aliases:
+          - jaeger
+
+  throttling-service:
+    build:
+      dockerfile: docker/java/Dockerfile
+      context: .
+    environment:
+      - TZ=Europe/Amsterdam
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
+      - OTEL_SERVICE_NAME=throttling-service
+
+    ports:
+      - "8080:9999"
+    networks:
+      ebms-core_network:
+        aliases:
+          - throttling-service
+    depends_on:
+      - ebms-database
+    restart: always
+
+  ebms-database:
+    image: ${OSDBK_IMAGE_REPOSITORY}/ebms-postgresql:${EBMS_POSTGRESQL_IMAGE_TAG}
+    user: root
+    privileged: true
+    environment:
+      - TZ=Europe/Amsterdam
+      - POSTGRES_USER=${EBMS_JDBC_USERNAME}
+      - POSTGRES_PASSWORD=${EBMS_JDBC_PASSWORD}
+      - POSTGRES_DB=ebms
+    ports:
+      - "5432:5432"
+    networks:
+      ebms-core_network:
+        aliases:
+          - database
+
+networks:
+  ebms-core_network:
+    driver: bridge

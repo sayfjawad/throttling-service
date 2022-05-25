@@ -1,0 +1,3 @@
+include:
+  - project: $BUILD_TEMPLATES_DIRECTORY
+    file: $BUILD_FILE

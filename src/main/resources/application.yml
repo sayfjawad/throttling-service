@@ -1,0 +1,38 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+    banner-mode: off
+  datasource:
+    xa:
+      data-source-class-name: org.postgresql.xa.PGXADataSource
+    url: jdbc:postgresql://ebms-database:5432/ebms
+    username: ebms
+    password: ebms
+    hikari:
+      connectionTimeout: 10000
+      keepaliveTime: 30000
+      maxLifetime: 35000
+      data-source-properties:
+        networkTimeout: 60000
+        # the socketTimeout property is set in seconds, NOT miliseconds!
+        socketTimeout: 60
+  task-executor:
+    corePoolSize: 10
+    maxPoolSize: 25
+    queueSize: 100
+
+logging:
+  config: logback.xml
+
+server:
+  port: 9999
+  error:
+    include-message: always
+
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true
+
