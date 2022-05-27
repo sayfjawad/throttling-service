@@ -25,7 +25,7 @@ logging:
   config: logback.xml
 
 server:
-  port: 9999
+  port: 8080
   error:
     include-message: always
 

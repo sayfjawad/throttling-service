@@ -24,5 +24,5 @@ USER 1001
 
 COPY target/*.jar app.jar
 
-EXPOSE 9999
+EXPOSE 8080
 ENTRYPOINT ["java","-javaagent:opentelemetry-javaagent.jar","-XX:MaxRAMPercentage=70","-jar","/app.jar"]
