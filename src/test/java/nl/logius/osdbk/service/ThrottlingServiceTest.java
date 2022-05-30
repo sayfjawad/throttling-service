@@ -16,10 +16,10 @@ import static org.mockito.Mockito.*;
 class ThrottlingServiceTest {
 
     @InjectMocks
-    ThrottlingService throttlingService;
+    private ThrottlingService throttlingService;
 
     @Mock
-    EbmsMessageRepository ebmsMessageRepository;
+    private EbmsMessageRepository ebmsMessageRepository;
 
     private String cpaId = "DGL-VERWERKEN-1-0$1-0_00000004003214345001-123456789012345678900001_928792FC79F211E8B020005056810F3E";
 

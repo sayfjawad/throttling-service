@@ -8,26 +8,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import static org.assertj.core.api.Assertions.assertThat;
-@SpringBootTest
+
+@SpringBootTest(classes = {ThrottlingServiceApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
 class ThrottlingServiceApplicationTests {
 
-	@Autowired
-	private ThrottlingController throttlingController;
+    @Autowired
+    private ThrottlingController throttlingController;
 
-	@Autowired
-	ThrottlingService throttlingService;
+    @Autowired
+    private ThrottlingService throttlingService;
 
-	@Autowired
-	EbmsMessageRepository ebmsMessageRepository;
+    @Autowired
+    private EbmsMessageRepository ebmsMessageRepository;
 
-	@Test
-	void contextLoads() {
-		ThrottlingServiceApplication.main(new String[] {});
-		assertThat(throttlingController).isNotNull();
-		assertThat(throttlingService).isNotNull();
-		assertThat(ebmsMessageRepository).isNotNull();
-	}
+    @Test
+    void testContextLoads() {
+        assertThat(throttlingController).isNotNull();
+        assertThat(throttlingService).isNotNull();
+        assertThat(ebmsMessageRepository).isNotNull();
+    }
+
+    @Test
+    void testApplicationStartup() {
+        ThrottlingServiceApplication.main(new String[]{});
+    }
 
 }

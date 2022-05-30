@@ -25,10 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ThrottlingControllerTest {
 
     @MockBean
-    ThrottlingService throttlingService;
+    private ThrottlingService throttlingService;
 
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @Mock
     private CompletableFuture<Integer> amountOfRecordsReadyToBeSentForCpa;
