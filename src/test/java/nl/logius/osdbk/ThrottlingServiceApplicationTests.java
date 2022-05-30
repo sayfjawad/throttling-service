@@ -24,6 +24,7 @@ class ThrottlingServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
+		ThrottlingServiceApplication.main(new String[] {});
 		assertThat(throttlingController).isNotNull();
 		assertThat(throttlingService).isNotNull();
 		assertThat(ebmsMessageRepository).isNotNull();
