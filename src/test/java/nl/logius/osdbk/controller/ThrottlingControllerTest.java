@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.concurrent.CompletableFuture;
 
 import static org.hamcrest.Matchers.aMapWithSize;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,6 +57,9 @@ class ThrottlingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", aMapWithSize(2)))
                 .andExpect(jsonPath("$.amountOfPendingTasks", Matchers.is(3)));
+
+        verify(throttlingService, times(1)).getAmountOfRecordsReadyToBeSentForCpa(cpaId);
+        verify(throttlingService, times(1)).getAmountOfRecordsAlreadySentInLastSecondForCpa(cpaId);
     }
 
     @Test
@@ -63,5 +68,8 @@ class ThrottlingControllerTest {
         mockMvc.perform(get("/throttling/" + blankCpaId + "/pendingTasks"))
                 .andExpect(status().is4xxClientError())
                 .andExpect(status().reason("No cpaId provided"));
+
+        verify(throttlingService, times(0)).getAmountOfRecordsReadyToBeSentForCpa(cpaId);
+        verify(throttlingService, times(0)).getAmountOfRecordsAlreadySentInLastSecondForCpa(cpaId);
     }
 }
