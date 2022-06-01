@@ -26,6 +26,7 @@ public class ThrottlingService {
 
     @Async
     public CompletableFuture<Integer> getAmountOfRecordsReadyToBeSentForCpa(String cpaid) {
+
         int amountOfRecordsReadyToBeSent = jdbcTemplate.queryForObject(readyToBeSentSQL, Integer.class, cpaid);
         logger.info("throttling-service getAmountOfRecordsReadyToBeSentForCpa executed for cpaId: {} and amountOfRecordsReadyToBeSent: {} ", cpaid, amountOfRecordsReadyToBeSent);
         return CompletableFuture.completedFuture(amountOfRecordsReadyToBeSent);
@@ -33,6 +34,7 @@ public class ThrottlingService {
 
     @Async
     public CompletableFuture<Integer> getAmountOfRecordsAlreadySentInLastSecondForCpa(String cpaid) {
+
         int amountOfRecordsAlreadySent = jdbcTemplate.queryForObject(alreadySentSQL, Integer.class, cpaid);
         logger.info("throttling-service getAmountOfRecordsAlreadySentInLastSecondForCpa executed for cpaId: {} and amountOfRecordsAlreadySent: {} ", cpaid, amountOfRecordsAlreadySent);
         return CompletableFuture.completedFuture(amountOfRecordsAlreadySent);
