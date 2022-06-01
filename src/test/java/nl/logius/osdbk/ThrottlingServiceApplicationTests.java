@@ -1,7 +1,6 @@
 package nl.logius.osdbk;
 
 import nl.logius.osdbk.controller.ThrottlingController;
-import nl.logius.osdbk.persistence.repository.EbmsMessageRepository;
 import nl.logius.osdbk.service.ThrottlingService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,15 +20,11 @@ class ThrottlingServiceApplicationTests {
     @Autowired
     private ThrottlingService throttlingService;
 
-    @Autowired
-    private EbmsMessageRepository ebmsMessageRepository;
-
     @Test
     void testContextLoads() {
         ThrottlingServiceApplication.main(new String[]{});
         assertThat(throttlingController).isNotNull();
         assertThat(throttlingService).isNotNull();
-        assertThat(ebmsMessageRepository).isNotNull();
     }
 
 }

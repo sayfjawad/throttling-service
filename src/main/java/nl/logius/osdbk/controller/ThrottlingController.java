@@ -1,6 +1,5 @@
 package nl.logius.osdbk.controller;
 
-import nl.logius.osdbk.model.PendingTasks;
 import nl.logius.osdbk.service.ThrottlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,7 @@ public class ThrottlingController {
 
     @GetMapping("/throttling/{cpaid}/pendingTasks")
     @ResponseBody
-    public PendingTasks getAmountOfPendingTasksForCpa(@PathVariable String cpaid) {
+    public int getAmountOfPendingTasksForCpa(@PathVariable String cpaid) {
 
         if(cpaid.isBlank()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No cpaId provided");
@@ -42,12 +41,8 @@ public class ThrottlingController {
                 .map(CompletableFuture::join)
                 .mapToInt(Integer::intValue).sum();
 
-        PendingTasks pendingTasks = new PendingTasks();
-        pendingTasks.setCpaId(cpaid);
-        pendingTasks.setAmountOfPendingTasks(amountOfPendingTasks);
-
-        logger.info("throttling-service getAmountOfPendingTasksForCpa executed for cpaId: {} and amountOfPendingTasks: {}", cpaid, pendingTasks);
-        return pendingTasks;
+        logger.info("throttling-service getAmountOfPendingTasksForCpa executed for cpaId: {} and amountOfPendingTasks: {}", cpaid, amountOfPendingTasks);
+        return amountOfPendingTasks;
     }
 
 }

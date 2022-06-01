@@ -1,7 +1,6 @@
 package nl.logius.osdbk.controller;
 
 import nl.logius.osdbk.service.ThrottlingService;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.aMapWithSize;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -55,8 +54,7 @@ class ThrottlingControllerTest {
 
         mockMvc.perform(get("/throttling/" + cpaId + "/pendingTasks"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", aMapWithSize(2)))
-                .andExpect(jsonPath("$.amountOfPendingTasks", Matchers.is(3)));
+                .andExpect(jsonPath("$", equalTo(3)));
 
         verify(throttlingService, times(1)).getAmountOfRecordsReadyToBeSentForCpa(cpaId);
         verify(throttlingService, times(1)).getAmountOfRecordsAlreadySentInLastSecondForCpa(cpaId);

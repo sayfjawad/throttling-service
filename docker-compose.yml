@@ -30,7 +30,7 @@ services:
       - OTEL_SERVICE_NAME=throttling-service
 
     ports:
-      - "8080:9999"
+      - "8080:8080"
     networks:
       ebms-core_network:
         aliases:

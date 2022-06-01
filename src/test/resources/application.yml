@@ -20,6 +20,10 @@ spring:
     corePoolSize: 10
     maxPoolSize: 25
     queueSize: 100
+  throttling-sql:
+    ready-to-send: "select COUNT(*) from ebms_message em where em.cpa_id = ? and status = 10"
+    already-sent: "select COUNT(*) from ebms_message em where em.cpa_id = ? and status in (11, 12, 13) and status_time BETWEEN now() - (interval '1s') and now()"
+
 
 server:
   port: 8080
