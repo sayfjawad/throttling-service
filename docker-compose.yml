@@ -28,7 +28,6 @@ services:
       - OTEL_TRACES_EXPORTER=jaeger
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
       - OTEL_SERVICE_NAME=throttling-service
-
     ports:
       - "8080:8080"
     networks:

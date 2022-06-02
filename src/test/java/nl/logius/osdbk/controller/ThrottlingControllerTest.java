@@ -52,7 +52,7 @@ class ThrottlingControllerTest {
         Mockito.when(throttlingService.getAmountOfRecordsReadyToBeSentForCpa(cpaId)).thenReturn(amountOfRecordsReadyToBeSentForCpa);
         Mockito.when(throttlingService.getAmountOfRecordsAlreadySentInLastSecondForCpa(cpaId)).thenReturn(amountOfRecordsAlreadySentInLastSecondForCpa);
 
-        mockMvc.perform(get("/throttling/" + cpaId + "/pendingTasks"))
+        mockMvc.perform(get("/throttling/" + cpaId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", equalTo(3)));
 
@@ -63,7 +63,7 @@ class ThrottlingControllerTest {
     @Test
     void getAmountOfPendingTasksForCpaNoCPA() throws Exception {
 
-        mockMvc.perform(get("/throttling/" + blankCpaId + "/pendingTasks"))
+        mockMvc.perform(get("/throttling/" + blankCpaId))
                 .andExpect(status().is4xxClientError())
                 .andExpect(status().reason("No cpaId provided"));
 
