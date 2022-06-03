@@ -20,9 +20,21 @@ spring:
     corePoolSize: 10
     maxPoolSize: 25
     queueSize: 100
-  throttling-sql:
-    ready-to-send: "select COUNT(*) from ebms_message em where em.cpa_id = ? and status = 10"
-    already-sent: "select COUNT(*) from ebms_message em where em.cpa_id = ? and status in (11, 12, 13) and status_time BETWEEN now() - (interval '1s') and now()"
+  
+throttling:
+  sql:
+    ready-to-send: "select COUNT(*) from ebms_message em where em.to_party_id = ? and status = 10"
+    already-sent: "select COUNT(*) from ebms_message em where em.to_party_id = ? and status in (11, 12, 13) and status_time BETWEEN now() - (interval '1s') and now()"
+  afnemers:
+    -
+      oin: 11111111111111111111
+      throttleValue: 2
+    -
+      oin: 22222222222222222222
+      throttleValue: 10
+    -
+      oin: 123456789012345678900001
+      throttleValue: 1
 
 logging:
   config: logback.xml

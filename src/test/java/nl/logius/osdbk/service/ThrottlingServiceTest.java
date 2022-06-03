@@ -1,5 +1,7 @@
 package nl.logius.osdbk.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,48 +11,82 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.concurrent.ExecutionException;
+import nl.logius.osdbk.configuration.ThrottlingConfiguration;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
 import static org.mockito.Mockito.*;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class ThrottlingServiceTest {
 
     @InjectMocks
     private ThrottlingService throttlingService;
 
     @Mock
+    private ThrottlingConfiguration throttlingConfiguration;
+    
+    @Mock
     JdbcTemplate jdbcTemplate;
 
-    @Value("${spring.throttling-sql.ready-to-send}")
-    private String readyToBeSentSQL;
-
-    @Value("${spring.throttling-sql.already-sent}")
-    private String alreadySentSQL;
-
     private String cpaId = "DGL-VERWERKEN-1-0$1-0_00000004003214345001-123456789012345678900001_928792FC79F211E8B020005056810F3E";
-
-    @Test
-    void getAmountOfRecordsReadyToBeSentForCpa() throws ExecutionException, InterruptedException {
-
-        int amountOfRecordsReadyToBeSentForCpa = 1;
-        when(jdbcTemplate.queryForObject(readyToBeSentSQL, Integer.class, cpaId)).thenReturn(amountOfRecordsReadyToBeSentForCpa);
-
-        //test
-        Integer amount = throttlingService.getAmountOfRecordsReadyToBeSentForCpa(cpaId).get();
-        assertEquals(1, amount);
-        verify(jdbcTemplate, times(1)).queryForObject(readyToBeSentSQL, Integer.class, cpaId);
+    private String oin = "11111111111111111111";
+    private String url = "http://localhost:8080/throttling/{cpaId}";
+    
+    @BeforeEach
+    public void setup() {
+        List<ThrottlingConfiguration.Afnemer> afnemers = new ArrayList<>();
+        ThrottlingConfiguration.Afnemer afnemer = new ThrottlingConfiguration.Afnemer();
+        afnemer.setOin(oin);
+        afnemer.setThrottleValue(10);
+        afnemers.add(afnemer);
+        when(throttlingConfiguration.getAfnemers()).thenReturn(afnemers);
+        ReflectionTestUtils.setField(throttlingService, "readyToBeSentSQL", "query1");
+        ReflectionTestUtils.setField(throttlingService, "alreadySentSQL", "query2");
     }
 
     @Test
-    void getAmountOfRecordsAlreadySentInLastSecondForCpa() throws ExecutionException, InterruptedException {
+    void testCapacityAvailable() throws ExecutionException, InterruptedException {
 
-        int amountOfRecordsAlreadySentInLastSecondForCpa = 2;
-        when(jdbcTemplate.queryForObject(alreadySentSQL, Integer.class, cpaId)).thenReturn(amountOfRecordsAlreadySentInLastSecondForCpa);
+        int amountOfRecordsReadyToBeSent = 1;
+        int amountOfRecordsAlreadySentInLastSecond = 1;
+        when(jdbcTemplate.queryForObject("query1", Integer.class, oin)).thenReturn(amountOfRecordsReadyToBeSent);
+        when(jdbcTemplate.queryForObject("query2", Integer.class, oin)).thenReturn(amountOfRecordsAlreadySentInLastSecond);
 
         //test
-        Integer amount = throttlingService.getAmountOfRecordsAlreadySentInLastSecondForCpa(cpaId).get();
-        assertEquals(2, amount);
-        verify(jdbcTemplate, times(1)).queryForObject(alreadySentSQL, Integer.class, cpaId);
+        boolean canSent = throttlingService.shouldAfnemerBeThrottled(oin);
+        
+        assertEquals(true, canSent);
+        verify(jdbcTemplate, times(1)).queryForObject("query1", Integer.class, oin);
+        verify(jdbcTemplate, times(1)).queryForObject("query2", Integer.class, oin);
+    }
+
+    @Test
+    void testNoCapacityAvailable() throws ExecutionException, InterruptedException {
+
+        int amountOfRecordsReadyToBeSent = 1;
+        int amountOfRecordsAlreadySentInLastSecond = 15;
+        when(jdbcTemplate.queryForObject("query1", Integer.class, oin)).thenReturn(amountOfRecordsReadyToBeSent);
+        when(jdbcTemplate.queryForObject("query2", Integer.class, oin)).thenReturn(amountOfRecordsAlreadySentInLastSecond);
+
+        //test
+        boolean canSent = throttlingService.shouldAfnemerBeThrottled(oin);
+        
+        assertEquals(false, canSent);
+        verify(jdbcTemplate, times(1)).queryForObject("query1", Integer.class, oin);
+        verify(jdbcTemplate, times(1)).queryForObject("query2", Integer.class, oin);
+    }
+
+    @Test
+    void testAfnemerNotConfiguredForThrottling() throws ExecutionException, InterruptedException {
+
+        //test
+        boolean canSent = throttlingService.shouldAfnemerBeThrottled("12345");
+        
+        assertEquals(true, canSent);
+        verify(jdbcTemplate, times(0)).queryForObject("query1", Integer.class, oin);
+        verify(jdbcTemplate, times(0)).queryForObject("query2", Integer.class, oin);
     }
 }

@@ -25,6 +25,7 @@ services:
       context: .
     environment:
       - TZ=Europe/Amsterdam
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ebms-database:5432/ebms
       - OTEL_TRACES_EXPORTER=jaeger
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
       - OTEL_SERVICE_NAME=throttling-service

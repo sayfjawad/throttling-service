@@ -38,3 +38,4 @@ mvnw.cmd
 .mvn/
 /nb-configuration.xml
 /nbactions.xml
+/nbproject/

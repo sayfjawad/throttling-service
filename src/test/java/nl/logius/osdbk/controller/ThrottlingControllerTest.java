@@ -1,10 +1,8 @@
 package nl.logius.osdbk.controller;
 
 import nl.logius.osdbk.service.ThrottlingService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -12,9 +10,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.concurrent.CompletableFuture;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,43 +29,27 @@ class ThrottlingControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
-    private CompletableFuture<Integer> amountOfRecordsReadyToBeSentForCpa;
-
-    @Mock
-    private CompletableFuture<Integer> amountOfRecordsAlreadySentInLastSecondForCpa;
-
-    private String cpaId = "DGL-VERWERKEN-1-0$1-0_00000004003214345001-123456789012345678900001_928792FC79F211E8B020005056810F3E";
-    private String blankCpaId = " ";
-
-    @BeforeEach
-    public void setUp() throws Exception {
-
-        amountOfRecordsReadyToBeSentForCpa = CompletableFuture.completedFuture(1);
-        amountOfRecordsAlreadySentInLastSecondForCpa = CompletableFuture.completedFuture(2);
-    }
+    private String blankOin = " ";
+    private String oin = "11111111111111111111";
 
     @Test
     void getAmountOfPendingTasksForCpa() throws Exception {
-        Mockito.when(throttlingService.getAmountOfRecordsReadyToBeSentForCpa(cpaId)).thenReturn(amountOfRecordsReadyToBeSentForCpa);
-        Mockito.when(throttlingService.getAmountOfRecordsAlreadySentInLastSecondForCpa(cpaId)).thenReturn(amountOfRecordsAlreadySentInLastSecondForCpa);
+        Mockito.when(throttlingService.shouldAfnemerBeThrottled(anyString())).thenReturn(Boolean.TRUE);
 
-        mockMvc.perform(get("/throttling/" + cpaId))
+        mockMvc.perform(get("/throttling/" + oin))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", equalTo(3)));
+                .andExpect(jsonPath("$", equalTo(true)));
 
-        verify(throttlingService, times(1)).getAmountOfRecordsReadyToBeSentForCpa(cpaId);
-        verify(throttlingService, times(1)).getAmountOfRecordsAlreadySentInLastSecondForCpa(cpaId);
+        verify(throttlingService, times(1)).shouldAfnemerBeThrottled(oin);
     }
 
     @Test
     void getAmountOfPendingTasksForCpaNoCPA() throws Exception {
 
-        mockMvc.perform(get("/throttling/" + blankCpaId))
+        mockMvc.perform(get("/throttling/" + blankOin))
                 .andExpect(status().is4xxClientError())
-                .andExpect(status().reason("No cpaId provided"));
+                .andExpect(status().reason("No afnemerOin provided"));
 
-        verify(throttlingService, times(0)).getAmountOfRecordsReadyToBeSentForCpa(cpaId);
-        verify(throttlingService, times(0)).getAmountOfRecordsAlreadySentInLastSecondForCpa(cpaId);
+        verify(throttlingService, times(0)).shouldAfnemerBeThrottled(anyString());
     }
 }
