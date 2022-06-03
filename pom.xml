@@ -2,22 +2,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>nl.logius.osdbk</groupId>
+    <artifactId>throttling-service</artifactId>
+    <version>1.0.0</version>
+    <name>throttling-service</name>
+    
+    <properties>
+        <java.version>11</java.version>
+    </properties>
+    
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.7.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>nl.logius.osdbk</groupId>
-    <artifactId>throttling-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>throttling-service</name>
-    <description>This service will be responsible for handling the throttling responsibility of the osdbk stack. The
-        jms-consumer will be the main consumer of this service.
-    </description>
-    <properties>
-        <java.version>11</java.version>
-    </properties>
+    
     <dependencies>
         <!-- Spring Framework -->
         <dependency>
@@ -54,7 +55,7 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>7.0.1</version>
+            <version>7.2</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.janino</groupId>
