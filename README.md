@@ -86,4 +86,4 @@ docker-compose --env-file path/to/env/file/.env up
 ~~~
 
 ### How to test this application locally
-A GET request can be invoked via Postman to: `http://localhost:8080/throttling/{cpaId}/pendingTasks` 
+A GET request can be invoked via Postman to: `http://localhost:8080/throttling/{afnemerOin}`
