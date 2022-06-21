@@ -30,16 +30,88 @@ services:
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
       - OTEL_SERVICE_NAME=throttling-service
     ports:
-      - "8080:8080"
+      - "8083:8080"
     networks:
       ebms-core_network:
         aliases:
           - throttling-service
     depends_on:
-      - ebms-database
+      - database
     restart: always
 
-  ebms-database:
+  jms-consumer:
+    build:
+      dockerfile: docker/java/Dockerfile
+      context: .
+    environment:
+      - TZ=Europe/Amsterdam
+      - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
+      - SPRING_ACTIVEMQ_USER=${JMS_CONSUMER_ACTIVEMQ_USER}
+      - SPRING_ACTIVEMQ_PASSWORD=${JMS_CONSUMER_ACTIVEMQ_PASSWORD}
+      - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8888/service/ebms
+      - EBMS_CPA_SERVICE_URL=http://ebms-core:8888/service/cpa
+      - THROTTLING_URL=http://throttling-service:8080/throttling/{afnemerOin}
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
+      - OTEL_SERVICE_NAME=jms-consumer
+    ports:
+      - "8082:9999" # actuator endpoint
+    networks:
+      ebms-core_network:
+        aliases:
+          - jms-consumer
+    depends_on:
+      - ebms-core
+      - activemq
+    restart: always
+    
+  jms-producer:
+    image: ${OSDBK_IMAGE_REPOSITORY}/jms-producer:${JMS_PRODUCER_IMAGE_TAG}
+    environment:
+      - TZ=Europe/Amsterdam
+      - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
+      - SPRING_ACTIVEMQ_USER=${JMS_PRODUCER_ACTIVEMQ_USER}
+      - SPRING_ACTIVEMQ_PASSWORD=${JMS_PRODUCER_ACTIVEMQ_PASSWORD}
+      - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8888/service/ebms
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
+      - OTEL_SERVICE_NAME=jms-producer
+    ports:
+      - "8081:9999" # actuator endpoint
+    networks:
+      ebms-core_network:
+        aliases:
+          - jms-producer
+    depends_on:
+      - ebms-core
+      - activemq
+    restart: always
+    
+  ebms-core:
+    image: ${OSDBK_IMAGE_REPOSITORY}/ebms-core:${EBMS_CORE_IMAGE_TAG}
+    environment:
+      - TZ=Europe/Amsterdam
+      - EBMS_JDBC_URL=jdbc:postgresql://database:5432/ebms
+      - EBMS_JDBC_USERNAME=${EBMS_JDBC_USERNAME}
+      - EBMS_JDBC_PASSWORD=${EBMS_JDBC_PASSWORD}
+      - JMS_BROKERURL=tcp://activemq:61616
+      - JMS_BROKER_USERNAME=${EBMS_JMS_BROKER_USERNAME}
+      - JMS_BROKER_PASSWORD=${EBMS_JMS_BROKER_PASSWORD}
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
+      - OTEL_SERVICE_NAME=ebms-core
+    ports:
+      - "8080:8080"
+      - "8888:8888"
+    networks:
+      ebms-core_network:
+        aliases:
+          - ebms-admin
+    depends_on:
+      - database
+      - activemq
+
+  database:
     image: ${OSDBK_IMAGE_REPOSITORY}/ebms-postgresql:${EBMS_POSTGRESQL_IMAGE_TAG}
     user: root
     privileged: true
@@ -54,6 +126,63 @@ services:
       ebms-core_network:
         aliases:
           - database
+
+  activemq:
+    image: ${OSDBK_IMAGE_REPOSITORY}/activemq:${ACTIVEMQ_IMAGE_TAG}
+    environment:
+      - ACTIVEMQ_TMP=/tmp
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+    networks:
+      ebms-core_network:
+        aliases:
+          - activemq
+    depends_on:
+      - activemq-db
+    restart: always
+
+  activemq-db:
+    image: bitnami/postgresql:latest
+    environment:
+      - TZ=Europe/Amsterdam
+      - POSTGRESQL_USERNAME=${ACTIVEMQ_POSTGRESQL_USERNAME}
+      - POSTGRESQL_PASSWORD=${ACTIVEMQ_POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DATABASE=activemq
+    networks:
+      ebms-core_network:
+        aliases:
+          - amq-db
+          - activemq-test-db
+
+  ebms-stub:
+    image: ${OSDBK_IMAGE_REPOSITORY}/ebms-stub:${EBMS_STUB_IMAGE_TAG}
+    environment:
+      - SENDER_EBMS-BROKER_URL=http://ebms-core:8080/ebms
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
+      - OTEL_SERVICE_NAME=ebms-stub
+    networks:
+      ebms-core_network:
+        aliases:
+          - stub
+
+  dgl-stub:
+    image: ${OSDBK_IMAGE_REPOSITORY}/dgl-stub:${DGL_STUB_IMAGE_TAG}
+    environment:
+      - TZ=Europe/Amsterdam
+      - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
+      - SPRING_ACTIVEMQ_USER=${ACTIVEMQ_USER}
+      - SPRING_ACTIVEMQ_PASSWORD=${ACTIVEMQ_USER}
+      - MESSAGE_SENDER_OIN_AFNEMER=${DGL_STUB_MESSAGE_SENDER_OIN_AFNEMER}
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
+      - OTEL_SERVICE_NAME=dgl-stub
+    networks:
+      ebms-core_network:
+        aliases:
+          - dgl-stub
+    restart: always
 
 networks:
   ebms-core_network:
