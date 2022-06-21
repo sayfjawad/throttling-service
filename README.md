@@ -1,6 +1,6 @@
-# throttling-service
+# Throttling-service & OSDBK
 
-This service will be responsible for assisting in determining the throttling responsibility of the osdbk stack. 
+The Throttling Service acts as an intermediary between the JMS Consumer and EbMS Core. The Throttling Service receives a REST call from the JMS Consumer that holds a receiver oin. The Throttling Service then queries the EbMS database and returns a. 
 The jms-consumer will be the main consumer of this service.
 
 The Throttling Service is part of OSDBK (Open Source Dienst Beveiligd Koppelvlak). OSDBK consists of five applications:
@@ -9,12 +9,12 @@ The Throttling Service is part of OSDBK (Open Source Dienst Beveiligd Koppelvlak
 - JMS Producer
 - JMS Consumer
 - Apache ActiveMQ
-- Throttling Service
+- Throttling Service (optional)
 
-The Throttling Service is responsible for determining the amount of pending tasks that is currently being processed per CPA.
+The Throttling Service is responsible for determining the amount of tasks that is currently being processed per afnemer.
 This is determined by adding the amount of messages that is ready to be sent per CPA and the amount of messages already sent in the last second per CPA. 
-This then gives you an indication of how busy the receiving party linked to the CPA is and if this receiving party is capable of accepting more traffic
-from the ebms-core or should we rather hold back the message so that the receiving party has more time to process it's current traffic and is ready to accept more messages.
+This then gives you an indication of how busy the receiving party linked to the CPA is and if this receiving party is capable of accepting more traffic.
+If not, the JMS Consumer will rollback the message to the queue and will retry to send it in the next second.
 
 ### EBMS Database Configuration
 The Throttling Service needs to query the EBMS database to determine the load that is being processed per CPA.
