@@ -16,7 +16,7 @@ public class ThrottlingController {
     private ThrottlingService throttlingService;
 
     @GetMapping("/throttling/{afnemerOin}")
-    public boolean getAmountOfPendingTasksForCpa(@PathVariable String afnemerOin) {
+    public boolean shouldAfnemerBeThrottled(@PathVariable String afnemerOin) {
 
         if(afnemerOin.isBlank()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No afnemerOin provided");

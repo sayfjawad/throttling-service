@@ -1,7 +1,7 @@
 # Throttling-service & OSDBK
 
-The Throttling Service acts as an intermediary between the JMS Consumer and EbMS Core. The Throttling Service receives a REST call from the JMS Consumer that holds a receiver oin. The Throttling Service then queries the EbMS database and returns a. 
-The jms-consumer will be the main consumer of this service.
+The Throttling Service acts as an intermediary between the JMS Consumer and EbMS Core. The Throttling Service receives a REST call from the JMS Consumer that holds a receiver oin. 
+The Throttling Service then queries the EbMS database and returns a boolean to signal if the afnemer should be throttled. 
 
 The Throttling Service is part of OSDBK (Open Source Dienst Beveiligd Koppelvlak). OSDBK consists of five applications:
 
