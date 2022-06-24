@@ -10,7 +10,7 @@
                     <providers>
                         <pattern>
                             <pattern>{"log_datetime": "%date{ISO8601}","log_level": "%level","log_class":
-                                "%logger","log_thread": "%thread","log_msg": "%message", "log_stacktrace": "%exception"}
+                                "%logger","log_thread": "%thread","log_msg": "%message", "log_stacktrace": "%exception", "mdc_attributes": "%X"}
                             </pattern>
                         </pattern>
                     </providers>
@@ -18,7 +18,7 @@
             </then>
             <else>
                 <encoder>
-                    <pattern>%d - %-5p [%t] %c - %m%n</pattern>
+                    <pattern>%d [%thread] %-5level %logger{36} - %msg %mdc%n</pattern>
                 </encoder>
             </else>
         </if>
