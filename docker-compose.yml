@@ -50,6 +50,7 @@ services:
       - SPRING_ACTIVEMQ_PASSWORD=${JMS_CONSUMER_ACTIVEMQ_PASSWORD}
       - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8888/service/ebms
       - EBMS_CPA_SERVICE_URL=http://ebms-core:8888/service/cpa
+      - THROTTLING_ENABLED=true
       - THROTTLING_URL=http://throttling-service:8080/throttling/{afnemerOin}
       - OTEL_TRACES_EXPORTER=jaeger
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
@@ -125,7 +126,7 @@ services:
     networks:
       ebms-core_network:
         aliases:
-          - database
+          - ebms-database
 
   activemq:
     image: ${OSDBK_IMAGE_REPOSITORY}/activemq:${ACTIVEMQ_IMAGE_TAG}
@@ -178,6 +179,7 @@ services:
       - OTEL_TRACES_EXPORTER=jaeger
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
       - OTEL_SERVICE_NAME=dgl-stub
+      - ABONNEMENT_DIVIDE-LOAD=false
     networks:
       ebms-core_network:
         aliases:

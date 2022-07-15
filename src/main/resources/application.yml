@@ -5,7 +5,7 @@ spring:
   datasource:
     xa:
       data-source-class-name: org.postgresql.xa.PGXADataSource
-    url: jdbc:postgresql://ebms-database:5432/ebms
+    url: jdbc:postgresql://localhost:5432/ebms
     username: ebms
     password: ebms
     hikari:
@@ -28,10 +28,10 @@ throttling:
   afnemers:
     -
       oin: 11111111111111111111
-      throttleValue: 2
+      throttleValue: 1
     -
       oin: 22222222222222222222
-      throttleValue: 10
+      throttleValue: 1
     -
       oin: 123456789012345678900001
       throttleValue: 1
