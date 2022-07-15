@@ -29,6 +29,8 @@ public class ThrottlingService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    
+    private static final String OIN_PREFIX = "urn:osb:oin:";
 
     public boolean shouldAfnemerBeThrottled(String afnemerOin) {
 
@@ -64,13 +66,13 @@ public class ThrottlingService {
 
     @Async
     private CompletableFuture<Integer> getAmountOfRecordsReadyToBeSentForAfnemer(String afnemerOin) {
-        int amountOfRecordsReadyToBeSent = jdbcTemplate.queryForObject(readyToBeSentSQL, Integer.class, afnemerOin);
+        int amountOfRecordsReadyToBeSent = jdbcTemplate.queryForObject(readyToBeSentSQL, Integer.class, OIN_PREFIX + afnemerOin);
         return CompletableFuture.completedFuture(amountOfRecordsReadyToBeSent);
     }
 
     @Async
     private CompletableFuture<Integer> getAmountOfRecordsAlreadySentInLastSecondForAfnemer(String afnemerOin) {
-        int amountOfRecordsAlreadySent = jdbcTemplate.queryForObject(alreadySentSQL, Integer.class, afnemerOin);
+        int amountOfRecordsAlreadySent = jdbcTemplate.queryForObject(alreadySentSQL, Integer.class, OIN_PREFIX + afnemerOin);
         return CompletableFuture.completedFuture(amountOfRecordsAlreadySent);
     }
 }
