@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package nl.logius.osdbk.configuration;
 
 import java.util.ArrayList;
@@ -19,8 +14,8 @@ class ThrottlingConfigurationTest {
     @InjectMocks
     private ThrottlingConfiguration throttlingConfiguration;
     
-    private String oin1 = "11111111111111111111";
-    private String oin2 = "22222222222222222222";
+    private final String oin1 = "11111111111111111111";
+    private final String oin2 = "22222222222222222222";
     
     @Test
     void throttlingConfiguration() {
