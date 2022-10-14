@@ -9,7 +9,7 @@ spring:
   datasource:
     xa:
       data-source-class-name: org.postgresql.xa.PGXADataSource
-    url: jdbc:postgresql://localhost:5432/ebms
+    url: jdbc:postgresql://ebms-database:5432/ebms
     username: ebms
     password: ebms
     hikari:
@@ -44,7 +44,7 @@ logging:
   config: logback.xml
 
 server:
-  port: 8083
+  port: 8080
   error:
     include-message: always
 

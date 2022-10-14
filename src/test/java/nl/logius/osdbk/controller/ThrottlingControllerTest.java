@@ -19,7 +19,6 @@ import org.springframework.http.HttpHeaders;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.springframework.util.Base64Utils;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(ThrottlingController.class)
