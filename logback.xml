@@ -1,7 +1,7 @@
 <configuration scan="true">
 
     <!-- This property determines which pattern to use, Json or Standard Text -->
-    <property name="LOG_CONSOLE_TO_JSON" value="true"/>
+    <property name="LOG_CONSOLE_TO_JSON" value="false"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <if condition='property("LOG_CONSOLE_TO_JSON").equals("true")'>

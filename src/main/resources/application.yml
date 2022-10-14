@@ -1,4 +1,8 @@
 spring:
+  security:
+    user:
+      name: changeit
+      password: changeit
   main:
     allow-bean-definition-overriding: true
     banner-mode: off
@@ -40,7 +44,7 @@ logging:
   config: logback.xml
 
 server:
-  port: 8080
+  port: 8083
   error:
     include-message: always
 

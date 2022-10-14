@@ -87,4 +87,11 @@ docker-compose --env-file path/to/env/file/.env up
 ~~~
 
 ### How to test this application locally
-A GET request can be invoked via Postman to: `http://localhost:8080/throttling/{afnemerOin}`
+A GET request can be invoked via Postman to: `http://localhost:8080/throttling/{afnemerOin}`. The endpoint is protected 
+by basic authentication. Basic Authentication can be configured via:
+~~~
+spring:
+  security:
+    user:
+      name: changeit
+      password: changeit
