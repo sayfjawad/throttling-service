@@ -28,9 +28,7 @@ class ThrottlingServiceTest {
     @Mock
     JdbcTemplate jdbcTemplate;
 
-    private String cpaId = "DGL-VERWERKEN-1-0$1-0_00000004003214345001-123456789012345678900001_928792FC79F211E8B020005056810F3E";
-    private String oin = "11111111111111111111";
-    private String url = "http://localhost:8080/throttling/{cpaId}";
+    private final String oin = "11111111111111111111";
     private static final String OIN_PREFIX = "urn:osb:oin:";
     
     @BeforeEach

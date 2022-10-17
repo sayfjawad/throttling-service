@@ -18,8 +18,8 @@ public class ThrottlingService {
 
     private static final Logger logger = LoggerFactory.getLogger(ThrottlingService.class);
 
-    @Autowired
-    private ThrottlingConfiguration throttlingConfiguration;
+    private final ThrottlingConfiguration throttlingConfiguration;
+    private final JdbcTemplate jdbcTemplate;
 
     @Value("${throttling.sql.ready-to-send}")
     private String readyToBeSentSQL;
@@ -28,7 +28,10 @@ public class ThrottlingService {
     private String alreadySentSQL;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    public ThrottlingService(ThrottlingConfiguration throttlingConfiguration, JdbcTemplate jdbcTemplate) {
+        this.throttlingConfiguration = throttlingConfiguration;
+        this.jdbcTemplate = jdbcTemplate;
+    }
     
     private static final String OIN_PREFIX = "urn:osb:oin:";
 

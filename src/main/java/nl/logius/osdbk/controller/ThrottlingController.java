@@ -12,8 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ThrottlingController {
 
+    private final ThrottlingService throttlingService;
+
     @Autowired
-    private ThrottlingService throttlingService;
+    public ThrottlingController (ThrottlingService throttlingService) {
+        this.throttlingService = throttlingService;
+    }
 
     @GetMapping("/throttling/{afnemerOin}")
     public boolean shouldAfnemerBeThrottled(@PathVariable String afnemerOin) {

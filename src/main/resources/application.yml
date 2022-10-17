@@ -1,11 +1,15 @@
 spring:
+  security:
+    user:
+      name: changeit
+      password: changeit
   main:
     allow-bean-definition-overriding: true
     banner-mode: off
   datasource:
     xa:
       data-source-class-name: org.postgresql.xa.PGXADataSource
-    url: jdbc:postgresql://localhost:5432/ebms
+    url: jdbc:postgresql://ebms-database:5432/ebms
     username: ebms
     password: ebms
     hikari:

@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import org.springframework.http.HttpHeaders;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,14 +30,16 @@ class ThrottlingControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private String blankOin = " ";
-    private String oin = "11111111111111111111";
+    private final String blankOin = " ";
+    private final String oin = "11111111111111111111";
+    private final String username = "changeit";
+    private final String password = "changeit";
 
     @Test
     void getAmountOfPendingTasksForCpa() throws Exception {
         Mockito.when(throttlingService.shouldAfnemerBeThrottled(anyString())).thenReturn(Boolean.TRUE);
 
-        mockMvc.perform(get("/throttling/" + oin))
+        mockMvc.perform(get("/throttling/" + oin).headers(createHeadersWithBasicAuth(username, password)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", equalTo(true)));
 
@@ -46,10 +49,16 @@ class ThrottlingControllerTest {
     @Test
     void getAmountOfPendingTasksForCpaNoCPA() throws Exception {
 
-        mockMvc.perform(get("/throttling/" + blankOin))
+        mockMvc.perform(get("/throttling/" + blankOin).headers(createHeadersWithBasicAuth(username, password)))
                 .andExpect(status().is4xxClientError())
                 .andExpect(status().reason("No afnemerOin provided"));
 
         verify(throttlingService, times(0)).shouldAfnemerBeThrottled(anyString());
+    }
+    
+     private HttpHeaders createHeadersWithBasicAuth(String username, String password) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(username, password);
+        return headers;
     }
 }
