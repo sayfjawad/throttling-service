@@ -2,9 +2,6 @@ package nl.logius.osdbk.service;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
@@ -19,21 +16,13 @@ public class ThrottlingService {
     private static final Logger logger = LoggerFactory.getLogger(ThrottlingService.class);
 
     private final ThrottlingConfiguration throttlingConfiguration;
-    private final JdbcTemplate jdbcTemplate;
-
-    @Value("${throttling.sql.ready-to-send}")
-    private String readyToBeSentSQL;
-
-    @Value("${throttling.sql.already-sent}")
-    private String alreadySentSQL;
+    private final AsyncService asyncService;
 
     @Autowired
-    public ThrottlingService(ThrottlingConfiguration throttlingConfiguration, JdbcTemplate jdbcTemplate) {
+    public ThrottlingService(ThrottlingConfiguration throttlingConfiguration, AsyncService asyncService) {
         this.throttlingConfiguration = throttlingConfiguration;
-        this.jdbcTemplate = jdbcTemplate;
+        this.asyncService = asyncService;
     }
-    
-    private static final String OIN_PREFIX = "urn:osb:oin:";
 
     public boolean shouldAfnemerBeThrottled(String afnemerOin) {
 
@@ -46,8 +35,8 @@ public class ThrottlingService {
             ThrottlingConfiguration.Afnemer throttledAfnemer = optionalThrottledAfnemer.get();
             int throttleValue = throttledAfnemer.getThrottleValue();
 
-            CompletableFuture<Integer> amountOfRecordsReadyToBeSent = getAmountOfRecordsReadyToBeSentForAfnemer(afnemerOin);
-            CompletableFuture<Integer> amountOfRecordsAlreadySentInLastSecond = getAmountOfRecordsAlreadySentInLastSecondForAfnemer(afnemerOin);
+            CompletableFuture<Integer> amountOfRecordsReadyToBeSent = asyncService.getAmountOfRecordsReadyToBeSentForAfnemer(afnemerOin);
+            CompletableFuture<Integer> amountOfRecordsAlreadySentInLastSecond = asyncService.getAmountOfRecordsAlreadySentInLastSecondForAfnemer(afnemerOin);
 
             int numberOfTasksInLastSecond = Stream.of(amountOfRecordsReadyToBeSent, amountOfRecordsAlreadySentInLastSecond)
                     .map(CompletableFuture::join)
@@ -67,15 +56,4 @@ public class ThrottlingService {
         }
     }
 
-    @Async
-    private CompletableFuture<Integer> getAmountOfRecordsReadyToBeSentForAfnemer(String afnemerOin) {
-        int amountOfRecordsReadyToBeSent = jdbcTemplate.queryForObject(readyToBeSentSQL, Integer.class, OIN_PREFIX + afnemerOin);
-        return CompletableFuture.completedFuture(amountOfRecordsReadyToBeSent);
-    }
-
-    @Async
-    private CompletableFuture<Integer> getAmountOfRecordsAlreadySentInLastSecondForAfnemer(String afnemerOin) {
-        int amountOfRecordsAlreadySent = jdbcTemplate.queryForObject(alreadySentSQL, Integer.class, OIN_PREFIX + afnemerOin);
-        return CompletableFuture.completedFuture(amountOfRecordsAlreadySent);
-    }
 }
