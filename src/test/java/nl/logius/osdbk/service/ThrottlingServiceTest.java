@@ -44,7 +44,7 @@ class ThrottlingServiceTest {
         when(throttlingConfiguration.getAfnemers()).thenReturn(afnemers);
         parameters = new HashMap<>();
         parameters.put("afnemerOin", OIN_PREFIX + oin);
-        ReflectionTestUtils.setField(throttlingService, "combinedCountSql", "query1");
+        ReflectionTestUtils.setField(throttlingService, "combinedCountSQL", "query1");
     }
 
     @Test
