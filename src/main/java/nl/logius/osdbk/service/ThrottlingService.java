@@ -22,7 +22,7 @@ public class ThrottlingService {
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Value("${throttling.sql.combined-count}")
-    private String combinedCountSql;
+    private String combinedCountSQL;
 
     private static final String OIN_PREFIX = "urn:osb:oin:";
 
@@ -64,7 +64,7 @@ public class ThrottlingService {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("afnemerOin", OIN_PREFIX + afnemerOin);
 
-        return jdbcTemplate.queryForObject(combinedCountSql, parameters, Integer.class);
+        return jdbcTemplate.queryForObject(combinedCountSQL, parameters, Integer.class);
     }
 
 }
