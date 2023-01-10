@@ -1,11 +1,13 @@
 package nl.logius.osdbk.service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 import nl.logius.osdbk.configuration.ThrottlingConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +18,20 @@ public class ThrottlingService {
     private static final Logger logger = LoggerFactory.getLogger(ThrottlingService.class);
 
     private final ThrottlingConfiguration throttlingConfiguration;
-    private final AsyncService asyncService;
+
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+
+    @Value("${throttling.sql.combined-count}")
+    private String combinedCountSql;
+
+    private static final String OIN_PREFIX = "urn:osb:oin:";
 
     @Autowired
-    public ThrottlingService(ThrottlingConfiguration throttlingConfiguration, AsyncService asyncService) {
+    public ThrottlingService(ThrottlingConfiguration throttlingConfiguration, NamedParameterJdbcTemplate jdbcTemplate) {
         this.throttlingConfiguration = throttlingConfiguration;
-        this.asyncService = asyncService;
+        this.jdbcTemplate = jdbcTemplate;
     }
+
 
     public boolean shouldAfnemerBeThrottled(String afnemerOin) {
 
@@ -35,13 +44,7 @@ public class ThrottlingService {
             ThrottlingConfiguration.Afnemer throttledAfnemer = optionalThrottledAfnemer.get();
             int throttleValue = throttledAfnemer.getThrottleValue();
 
-            CompletableFuture<Integer> amountOfRecordsReadyToBeSent = asyncService.getAmountOfRecordsReadyToBeSentForAfnemer(afnemerOin);
-            CompletableFuture<Integer> amountOfRecordsAlreadySentInLastSecond = asyncService.getAmountOfRecordsAlreadySentInLastSecondForAfnemer(afnemerOin);
-
-            int numberOfTasksInLastSecond = Stream.of(amountOfRecordsReadyToBeSent, amountOfRecordsAlreadySentInLastSecond)
-                    .map(CompletableFuture::join)
-                    .mapToInt(Integer::intValue)
-                    .sum();
+            int numberOfTasksInLastSecond = getCombinedMessageCount(afnemerOin);
 
             if (numberOfTasksInLastSecond < throttleValue) {
                 logger.info("Afnemer {} with throttle value {} can handle {} more messages. Message will be sent", afnemerOin, throttleValue, (throttleValue - numberOfTasksInLastSecond));
@@ -54,6 +57,14 @@ public class ThrottlingService {
                 logger.info("Afnemer {} is not throttled. Message will be sent", afnemerOin);
             return true;
         }
+    }
+
+    private int getCombinedMessageCount(String afnemerOin) {
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("afnemerOin", OIN_PREFIX + afnemerOin);
+
+        return jdbcTemplate.queryForObject(combinedCountSql, parameters, Integer.class);
     }
 
 }

@@ -1,21 +1,24 @@
 package nl.logius.osdbk.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.Map;
 import nl.logius.osdbk.configuration.ThrottlingConfiguration;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class ThrottlingServiceTest {
 
     @InjectMocks
@@ -23,11 +26,13 @@ class ThrottlingServiceTest {
 
     @Mock
     private ThrottlingConfiguration throttlingConfiguration;
-    
+
     @Mock
-    AsyncService asyncService;
+    NamedParameterJdbcTemplate jdbcTemplate;
 
     private final String oin = "11111111111111111111";
+    private static final String OIN_PREFIX = "urn:osb:oin:";
+    Map<String, String> parameters;
 
     @BeforeEach
     public void setup() {
@@ -37,38 +42,35 @@ class ThrottlingServiceTest {
         afnemer.setThrottleValue(10);
         afnemers.add(afnemer);
         when(throttlingConfiguration.getAfnemers()).thenReturn(afnemers);
+        parameters = new HashMap<>();
+        parameters.put("afnemerOin", OIN_PREFIX + oin);
+        ReflectionTestUtils.setField(throttlingService, "combinedCountSql", "query1");
     }
 
     @Test
     void testCapacityAvailable() {
 
-        int amountOfRecordsReadyToBeSent = 1;
-        int amountOfRecordsAlreadySentInLastSecond = 1;
-        when(asyncService.getAmountOfRecordsReadyToBeSentForAfnemer(oin)).thenReturn(CompletableFuture.completedFuture(amountOfRecordsReadyToBeSent));
-        when(asyncService.getAmountOfRecordsAlreadySentInLastSecondForAfnemer(oin)).thenReturn(CompletableFuture.completedFuture(amountOfRecordsAlreadySentInLastSecond));
+        int combinedRecordsCount = 1;
+        when(jdbcTemplate.queryForObject("query1", parameters,Integer.class)).thenReturn(combinedRecordsCount);
 
         //test
         boolean canSent = throttlingService.shouldAfnemerBeThrottled(oin);
 
         assertTrue(canSent);
-        verify(asyncService, times(1)).getAmountOfRecordsReadyToBeSentForAfnemer(oin);
-        verify(asyncService, times(1)).getAmountOfRecordsAlreadySentInLastSecondForAfnemer(oin);
+        verify(jdbcTemplate, times(1)).queryForObject("query1", parameters,Integer.class);
     }
 
     @Test
     void testNoCapacityAvailable() {
 
-        int amountOfRecordsReadyToBeSent = 1;
-        int amountOfRecordsAlreadySentInLastSecond = 15;
-        when(asyncService.getAmountOfRecordsReadyToBeSentForAfnemer(oin)).thenReturn(CompletableFuture.completedFuture(amountOfRecordsReadyToBeSent));
-        when(asyncService.getAmountOfRecordsAlreadySentInLastSecondForAfnemer(oin)).thenReturn(CompletableFuture.completedFuture(amountOfRecordsAlreadySentInLastSecond));
+        int combinedRecordsCount = 16;
+        when(jdbcTemplate.queryForObject("query1", parameters,Integer.class)).thenReturn(combinedRecordsCount);
 
         //test
         boolean canSent = throttlingService.shouldAfnemerBeThrottled(oin);
 
         assertFalse(canSent);
-        verify(asyncService, times(1)).getAmountOfRecordsReadyToBeSentForAfnemer(oin);
-        verify(asyncService, times(1)).getAmountOfRecordsAlreadySentInLastSecondForAfnemer(oin);
+        verify(jdbcTemplate, times(1)).queryForObject("query1", parameters,Integer.class);
     }
 
     @Test
@@ -78,7 +80,6 @@ class ThrottlingServiceTest {
         boolean canSent = throttlingService.shouldAfnemerBeThrottled("12345");
 
         assertTrue(canSent);
-        verify(asyncService, times(0)).getAmountOfRecordsReadyToBeSentForAfnemer(oin);
-        verify(asyncService, times(0)).getAmountOfRecordsAlreadySentInLastSecondForAfnemer(oin);
+        verify(jdbcTemplate, times(0)).queryForObject("query1", parameters,Integer.class);
     }
 }
