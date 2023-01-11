@@ -1,14 +1,13 @@
 package nl.logius.osdbk.service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 import nl.logius.osdbk.configuration.ThrottlingConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,21 +18,20 @@ public class ThrottlingService {
     private static final Logger logger = LoggerFactory.getLogger(ThrottlingService.class);
 
     private final ThrottlingConfiguration throttlingConfiguration;
-    private final JdbcTemplate jdbcTemplate;
 
-    @Value("${throttling.sql.ready-to-send}")
-    private String readyToBeSentSQL;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    @Value("${throttling.sql.already-sent}")
-    private String alreadySentSQL;
+    @Value("${throttling.sql.combined-count}")
+    private String combinedCountSQL;
+
+    private static final String OIN_PREFIX = "urn:osb:oin:";
 
     @Autowired
-    public ThrottlingService(ThrottlingConfiguration throttlingConfiguration, JdbcTemplate jdbcTemplate) {
+    public ThrottlingService(ThrottlingConfiguration throttlingConfiguration, NamedParameterJdbcTemplate jdbcTemplate) {
         this.throttlingConfiguration = throttlingConfiguration;
         this.jdbcTemplate = jdbcTemplate;
     }
-    
-    private static final String OIN_PREFIX = "urn:osb:oin:";
+
 
     public boolean shouldAfnemerBeThrottled(String afnemerOin) {
 
@@ -46,13 +44,7 @@ public class ThrottlingService {
             ThrottlingConfiguration.Afnemer throttledAfnemer = optionalThrottledAfnemer.get();
             int throttleValue = throttledAfnemer.getThrottleValue();
 
-            CompletableFuture<Integer> amountOfRecordsReadyToBeSent = getAmountOfRecordsReadyToBeSentForAfnemer(afnemerOin);
-            CompletableFuture<Integer> amountOfRecordsAlreadySentInLastSecond = getAmountOfRecordsAlreadySentInLastSecondForAfnemer(afnemerOin);
-
-            int numberOfTasksInLastSecond = Stream.of(amountOfRecordsReadyToBeSent, amountOfRecordsAlreadySentInLastSecond)
-                    .map(CompletableFuture::join)
-                    .mapToInt(Integer::intValue)
-                    .sum();
+            int numberOfTasksInLastSecond = getCombinedMessageCount(afnemerOin);
 
             if (numberOfTasksInLastSecond < throttleValue) {
                 logger.info("Afnemer {} with throttle value {} can handle {} more messages. Message will be sent", afnemerOin, throttleValue, (throttleValue - numberOfTasksInLastSecond));
@@ -67,15 +59,12 @@ public class ThrottlingService {
         }
     }
 
-    @Async
-    private CompletableFuture<Integer> getAmountOfRecordsReadyToBeSentForAfnemer(String afnemerOin) {
-        int amountOfRecordsReadyToBeSent = jdbcTemplate.queryForObject(readyToBeSentSQL, Integer.class, OIN_PREFIX + afnemerOin);
-        return CompletableFuture.completedFuture(amountOfRecordsReadyToBeSent);
+    private int getCombinedMessageCount(String afnemerOin) {
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("afnemerOin", OIN_PREFIX + afnemerOin);
+
+        return jdbcTemplate.queryForObject(combinedCountSQL, parameters, Integer.class);
     }
 
-    @Async
-    private CompletableFuture<Integer> getAmountOfRecordsAlreadySentInLastSecondForAfnemer(String afnemerOin) {
-        int amountOfRecordsAlreadySent = jdbcTemplate.queryForObject(alreadySentSQL, Integer.class, OIN_PREFIX + afnemerOin);
-        return CompletableFuture.completedFuture(amountOfRecordsAlreadySent);
-    }
 }

@@ -27,8 +27,7 @@ spring:
   
 throttling:
   sql:
-    ready-to-send: "select COUNT(*) from ebms_message em where em.to_party_id = ? and status = 10"
-    already-sent: "select COUNT(*) from ebms_message em where em.to_party_id = ? and status in (11, 12, 13) and status_time BETWEEN now() - (interval '1s') and now()"
+    combined-count: "select (select COUNT(*) from ebms_message em where em.to_party_id = :afnemerOin and status = 10) + (select COUNT(*) from ebms_message em where em.to_party_id = :afnemerOin and status in (11, 12, 13) and status_time BETWEEN now() - (interval '1s') and now()) as total"
   afnemers:
     -
       oin: 11111111111111111111

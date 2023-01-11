@@ -1,20 +1,22 @@
 package nl.logius.osdbk.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
 import nl.logius.osdbk.configuration.ThrottlingConfiguration;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
-import static org.mockito.Mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class ThrottlingServiceTest {
@@ -24,13 +26,14 @@ class ThrottlingServiceTest {
 
     @Mock
     private ThrottlingConfiguration throttlingConfiguration;
-    
+
     @Mock
-    JdbcTemplate jdbcTemplate;
+    NamedParameterJdbcTemplate jdbcTemplate;
 
     private final String oin = "11111111111111111111";
     private static final String OIN_PREFIX = "urn:osb:oin:";
-    
+    Map<String, String> parameters;
+
     @BeforeEach
     public void setup() {
         List<ThrottlingConfiguration.Afnemer> afnemers = new ArrayList<>();
@@ -39,50 +42,44 @@ class ThrottlingServiceTest {
         afnemer.setThrottleValue(10);
         afnemers.add(afnemer);
         when(throttlingConfiguration.getAfnemers()).thenReturn(afnemers);
-        ReflectionTestUtils.setField(throttlingService, "readyToBeSentSQL", "query1");
-        ReflectionTestUtils.setField(throttlingService, "alreadySentSQL", "query2");
+        parameters = new HashMap<>();
+        parameters.put("afnemerOin", OIN_PREFIX + oin);
+        ReflectionTestUtils.setField(throttlingService, "combinedCountSQL", "query1");
     }
 
     @Test
-    void testCapacityAvailable() throws ExecutionException, InterruptedException {
+    void testCapacityAvailable() {
 
-        int amountOfRecordsReadyToBeSent = 1;
-        int amountOfRecordsAlreadySentInLastSecond = 1;
-        when(jdbcTemplate.queryForObject("query1", Integer.class, OIN_PREFIX + oin)).thenReturn(amountOfRecordsReadyToBeSent);
-        when(jdbcTemplate.queryForObject("query2", Integer.class, OIN_PREFIX + oin)).thenReturn(amountOfRecordsAlreadySentInLastSecond);
+        int combinedRecordsCount = 1;
+        when(jdbcTemplate.queryForObject("query1", parameters,Integer.class)).thenReturn(combinedRecordsCount);
 
         //test
         boolean canSent = throttlingService.shouldAfnemerBeThrottled(oin);
-        
-        assertEquals(true, canSent);
-        verify(jdbcTemplate, times(1)).queryForObject("query1", Integer.class, OIN_PREFIX + oin);
-        verify(jdbcTemplate, times(1)).queryForObject("query2", Integer.class, OIN_PREFIX + oin);
+
+        assertTrue(canSent);
+        verify(jdbcTemplate, times(1)).queryForObject("query1", parameters,Integer.class);
     }
 
     @Test
-    void testNoCapacityAvailable() throws ExecutionException, InterruptedException {
+    void testNoCapacityAvailable() {
 
-        int amountOfRecordsReadyToBeSent = 1;
-        int amountOfRecordsAlreadySentInLastSecond = 15;
-        when(jdbcTemplate.queryForObject("query1", Integer.class, OIN_PREFIX + oin)).thenReturn(amountOfRecordsReadyToBeSent);
-        when(jdbcTemplate.queryForObject("query2", Integer.class, OIN_PREFIX + oin)).thenReturn(amountOfRecordsAlreadySentInLastSecond);
+        int combinedRecordsCount = 16;
+        when(jdbcTemplate.queryForObject("query1", parameters,Integer.class)).thenReturn(combinedRecordsCount);
 
         //test
         boolean canSent = throttlingService.shouldAfnemerBeThrottled(oin);
-        
-        assertEquals(false, canSent);
-        verify(jdbcTemplate, times(1)).queryForObject("query1", Integer.class, OIN_PREFIX + oin);
-        verify(jdbcTemplate, times(1)).queryForObject("query2", Integer.class, OIN_PREFIX + oin);
+
+        assertFalse(canSent);
+        verify(jdbcTemplate, times(1)).queryForObject("query1", parameters,Integer.class);
     }
 
     @Test
-    void testAfnemerNotConfiguredForThrottling() throws ExecutionException, InterruptedException {
+    void testAfnemerNotConfiguredForThrottling() {
 
         //test
         boolean canSent = throttlingService.shouldAfnemerBeThrottled("12345");
-        
-        assertEquals(true, canSent);
-        verify(jdbcTemplate, times(0)).queryForObject("query1", Integer.class, OIN_PREFIX + oin);
-        verify(jdbcTemplate, times(0)).queryForObject("query2", Integer.class, OIN_PREFIX + oin);
+
+        assertTrue(canSent);
+        verify(jdbcTemplate, times(0)).queryForObject("query1", parameters,Integer.class);
     }
 }
