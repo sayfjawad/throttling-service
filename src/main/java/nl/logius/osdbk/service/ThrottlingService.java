@@ -1,10 +1,13 @@
 package nl.logius.osdbk.service;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Semaphore;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +28,8 @@ public class ThrottlingService {
     private String combinedCountSQL;
 
     private static final String OIN_PREFIX = "urn:osb:oin:";
+
+    private final Semaphore semaphore = new Semaphore(1);
 
     @Autowired
     public ThrottlingService(ThrottlingConfiguration throttlingConfiguration, NamedParameterJdbcTemplate jdbcTemplate) {
@@ -59,12 +64,29 @@ public class ThrottlingService {
         }
     }
 
+    /**
+     * Create a semaphore with a counter of 1 and acquire the semaphore before accessing the database.
+     * Once the listener is finished accessing the database, it releases the semaphore.
+     * This way, only one JMS listener will be able to access the database at a time, ensuring that multiple listeners
+     * do not read from the database simultaneously.
+     */
     private int getCombinedMessageCount(String afnemerOin) {
 
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("afnemerOin", OIN_PREFIX + afnemerOin);
+        int count = 0;
+        try {
+            semaphore.acquire();
 
-        return jdbcTemplate.queryForObject(combinedCountSQL, parameters, Integer.class);
+            Map<String, String> parameters = Collections.singletonMap("afnemerOin", OIN_PREFIX + afnemerOin);
+            count  = jdbcTemplate.queryForObject(combinedCountSQL, parameters, Integer.class);
+        } catch (InterruptedException e) {
+            logger.error("InterruptedException occurred while acquiring semaphore", e);
+            Thread.currentThread().interrupt();
+        } catch (DataAccessException e) {
+            logger.error("DataAccessException occurred while querying database", e);
+        } finally {
+            semaphore.release();
+        }
+        return count;
     }
 
 }
