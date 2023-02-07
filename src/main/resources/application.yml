@@ -20,14 +20,13 @@ spring:
         networkTimeout: 60000
         # the socketTimeout property is set in seconds, NOT miliseconds!
         socketTimeout: 60
-  task-executor:
-    corePoolSize: 10
-    maxPoolSize: 25
-    queueSize: 100
-  
+
 throttling:
   sql:
-    combined-count: "select (select COUNT(*) from ebms_message em where em.to_party_id = :afnemerOin and status = 10) + (select COUNT(*) from ebms_message em where em.to_party_id = :afnemerOin and status in (11, 12, 13) and status_time BETWEEN now() - (interval '1s') and now()) as total"
+    combined-count: "select 
+                       sum(case when em.status = 10 then 1 else 0 end) + 
+                       sum(case when em.status in (11, 12, 13) and status_time >= NOW() - INTERVAL '1 SECOND' then 1 else 0 end) 
+                     as total from ebms_message em where em.to_party_id = :afnemerOin"
   afnemers:
     -
       oin: 11111111111111111111

@@ -55,23 +55,6 @@ throttling:
       throttleValue: 10
 ~~~
 
-### Task Executor Configuration
-The Throttling Service makes use of a ThreadPoolTaskExecutor to determine the amount of pending tasks per CPA in an asynchronous manner.
-Based on performance and resource requirements this task executor can be configured in the application.yml.
-
-The following properties can be configured:
-- corePoolSize - Set the ThreadPoolExecutor's core pool size.
-- maxPoolSize - Set the ThreadPoolExecutor's maximum pool size.
-- queueSize - Set the capacity for the ThreadPoolExecutor's BlockingQueue.
-
-~~~
-spring:
-  task-executor:
-    corePoolSize: 10
-    maxPoolSize: 25
-    queueSize: 100
-~~~
-
 ### How to run this application locally
 An example docker-compose has been provided. This can be run to test this application.
 
