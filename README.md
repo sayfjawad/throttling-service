@@ -30,15 +30,6 @@ spring:
     password: ebms
 ~~~
 
-The queries are configured via:
-
-~~~
-throttling:
-  sql:
-    ready-to-send: "select COUNT(*) from ebms_message em where em.to_party_id = ? and status = 10"
-    already-sent: "select COUNT(*) from ebms_message em where em.to_party_id = ? and status in (11, 12, 13) and status_time BETWEEN now() - (interval '1s') and now()"
-~~~
-
 ### Throttled Afnemers Configuration
 The Throttling Service will only query the database if the afnemer of the message is configured for throttling. For each afnemer that needs
 to be throttled, an item consisting of the `oin` of the afnemer and the `throttleValue` (the amount of messages per second the afnemer can receive) must be 
