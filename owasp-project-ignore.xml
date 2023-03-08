@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <!-- This file contains all vulnerabilities that are deemed safe to ignore -->
+    <!-- We do not use Java deserialization of untrusted data in spring framework -->
+    <suppress>
+        <notes><![CDATA[file name: spring-*-5.3.25.jar]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-.*$</packageUrl>
+        <cve>CVE-2016-1000027</cve>
+    </suppress>
+    <!-- We only process the application.yml  -->
+    <suppress>
+        <notes><![CDATA[file name: snakeyaml*-1.3.0.jar]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml.*$</packageUrl>
+        <cve>CVE-2022-1471</cve>
+        <cve>CVE-2022-25857</cve>
+        <cve>CVE-2022-3064</cve>
+    </suppress>
+    <!-- The parser is not running on user supplied input  -->
+    <suppress>
+        <notes><![CDATA[file name: woodstox-core*-6.2.8.jar]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.woodstox/woodstox-core.*$</packageUrl>
+        <cve>CVE-2022-40152</cve>
+    </suppress>
+</suppressions>
