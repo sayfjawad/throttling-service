@@ -23,10 +23,9 @@ spring:
 
 throttling:
   sql:
-    combined-count: "select 
-                       sum(case when em.status = 10 then 1 else 0 end) + 
-                       sum(case when em.status in (11, 12, 13) and status_time >= NOW() - INTERVAL '1 SECOND' then 1 else 0 end) 
-                     as total from ebms_message em where em.to_party_id = :afnemerOin"
+    combined-count: "SELECT COALESCE(SUM(CASE WHEN em.status = 10 THEN 1 ELSE 0 END), 0) + 
+                     COALESCE(SUM(CASE WHEN em.status IN (11, 12, 13) AND status_time >= NOW() - INTERVAL '1 SECOND' THEN 1 ELSE 0 END), 0)
+                     AS total FROM ebms_message em WHERE em.to_party_id = :afnemerOin"
   afnemers:
     -
       oin: 11111111111111111111

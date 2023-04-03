@@ -83,7 +83,10 @@ public class ThrottlingService {
             Thread.currentThread().interrupt();
         } catch (DataAccessException e) {
             logger.error("DataAccessException occurred while querying database", e);
-        } finally {
+        } catch (Exception e) {
+            logger.error("Exception occurred while executing getCombinedMessageCount", e);
+        }
+        finally {
             semaphore.release();
         }
         return count;
