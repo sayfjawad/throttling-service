@@ -3,9 +3,10 @@
     <!-- This file contains all vulnerabilities that are deemed safe to ignore -->
     <!-- We do not use Java deserialization of untrusted data in spring framework -->
     <suppress>
-        <notes><![CDATA[file name: spring-*-5.3.25.jar]]></notes>
+        <notes><![CDATA[file name: spring-*-5.3.26.jar]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework/spring-.*$</packageUrl>
         <cve>CVE-2016-1000027</cve>
+        <cve>CVE-2023-20863</cve>
     </suppress>
     <!-- We only process the application.yml  -->
     <suppress>
