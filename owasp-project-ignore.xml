@@ -20,12 +20,6 @@
         <cve>CVE-2022-1471</cve>
         <cve>CVE-2022-25857</cve>
     </suppress>
-    <!-- The parser is not running on user supplied input  -->
-    <suppress>
-        <notes><![CDATA[file name: woodstox-core*-6.2.8.jar]]></notes>
-        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.woodstox/woodstox-core.*$</packageUrl>
-        <cve>CVE-2022-40152</cve>
-    </suppress>
     <!-- Spring security vulnerability awaiting reanalysis from nvd.nist.gov - ignore for now but reevaluate -->
     <suppress>
         <notes><![CDATA[file name: spring-*-5.7.7.jar]]></notes>
