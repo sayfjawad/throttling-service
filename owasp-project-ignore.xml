@@ -13,10 +13,12 @@
         <notes><![CDATA[file name: snakeyaml*-1.3.0.jar]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml.*$</packageUrl>
         <cve>CVE-2022-38749</cve>
+        <cve>CVE-2022-38750</cve>
         <cve>CVE-2022-38751</cve>
         <cve>CVE-2022-38752</cve>
         <cve>CVE-2022-41854</cve>
-        <cve>CVE-2022-38750</cve>
+        <cve>CVE-2022-1471</cve>
+        <cve>CVE-2022-25857</cve>
     </suppress>
     <!-- The parser is not running on user supplied input  -->
     <suppress>
@@ -24,7 +26,7 @@
         <packageUrl regex="true">^pkg:maven/com\.fasterxml\.woodstox/woodstox-core.*$</packageUrl>
         <cve>CVE-2022-40152</cve>
     </suppress>
-    <!-- Spring security vulnerability awaiting reanalysis - ignore fow now but reevaluate -->
+    <!-- Spring security vulnerability awaiting reanalysis from nvd.nist.gov - ignore for now but reevaluate -->
     <suppress>
         <notes><![CDATA[file name: spring-*-5.7.7.jar]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework.security/spring-.*$</packageUrl>
