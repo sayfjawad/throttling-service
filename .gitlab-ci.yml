@@ -4,3 +4,4 @@ include:
 
 variables:
   JDK_VERSION: "17"
+  DOCKER_TAG: 1.12.0
