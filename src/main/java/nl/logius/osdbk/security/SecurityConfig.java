@@ -25,10 +25,10 @@ public class SecurityConfig {
                 })
                 .and()
                 .authorizeRequests(authz -> authz
-                        .antMatchers(HttpMethod.GET,"/actuator/health").permitAll()
-                        .antMatchers("/", "/**").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/actuator/health").permitAll()
+                        .requestMatchers("/", "/**").authenticated()
                 )
-                .csrf().ignoringAntMatchers("/throttling/**")
+                .csrf().ignoringRequestMatchers("/throttling/**")
                 .and()
                 .httpBasic();
         return http.build();

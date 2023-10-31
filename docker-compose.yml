@@ -5,6 +5,9 @@ services:
     image: jaegertracing/all-in-one
     command: ["--reporter.grpc.host-port=localhost:14250"]
     environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - LC_ALL=en_US.UTF-8
       - TZ=Europe/Amsterdam
     ports:
       - 16686:16686
@@ -25,6 +28,9 @@ services:
       dockerfile: docker/java/Dockerfile
       context: .
     environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - LC_ALL=en_US.UTF-8
       - TZ=Europe/Amsterdam
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ebms-database:5432/ebms
       - OTEL_TRACES_EXPORTER=jaeger
@@ -37,22 +43,23 @@ services:
         aliases:
           - throttling-service
     depends_on:
-      - database
+      - ebms-database
     restart: always
 
   jms-consumer:
-    build:
-      dockerfile: docker/java/Dockerfile
-      context: .
+    image: ${OSDBK_IMAGE_REPOSITORY}/jms-consumer:${JMS_CONSUMER_IMAGE_TAG}
     environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - LC_ALL=en_US.UTF-8
       - TZ=Europe/Amsterdam
       - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
       - SPRING_ACTIVEMQ_USER=${JMS_CONSUMER_ACTIVEMQ_USER}
       - SPRING_ACTIVEMQ_PASSWORD=${JMS_CONSUMER_ACTIVEMQ_PASSWORD}
-      - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8888/service/ebms
-      - EBMS_CPA_SERVICE_URL=http://ebms-core:8888/service/cpa
+      - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8080/ebms
+      - CPA_SERVICE_URL=http://cpa-service:8080/cpa/find
+      - THROTTLING_URL=http://throttling-service:8080/throttling
       - THROTTLING_ENABLED=true
-      - THROTTLING_URL=http://throttling-service:8080/throttling/{afnemerOin}
       - OTEL_TRACES_EXPORTER=jaeger
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
       - OTEL_SERVICE_NAME=jms-consumer
@@ -64,17 +71,20 @@ services:
           - jms-consumer
     depends_on:
       - ebms-core
-      - activemq
+      - ebms-activemq
     restart: always
     
   jms-producer:
     image: ${OSDBK_IMAGE_REPOSITORY}/jms-producer:${JMS_PRODUCER_IMAGE_TAG}
     environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - LC_ALL=en_US.UTF-8
       - TZ=Europe/Amsterdam
       - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
       - SPRING_ACTIVEMQ_USER=${JMS_PRODUCER_ACTIVEMQ_USER}
       - SPRING_ACTIVEMQ_PASSWORD=${JMS_PRODUCER_ACTIVEMQ_PASSWORD}
-      - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8888/service/ebms
+      - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8080/ebms
       - OTEL_TRACES_EXPORTER=jaeger
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
       - OTEL_SERVICE_NAME=jms-producer
@@ -86,12 +96,15 @@ services:
           - jms-producer
     depends_on:
       - ebms-core
-      - activemq
+      - ebms-activemq
     restart: always
     
   ebms-core:
     image: ${OSDBK_IMAGE_REPOSITORY}/ebms-core:${EBMS_CORE_IMAGE_TAG}
     environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - LC_ALL=en_US.UTF-8
       - TZ=Europe/Amsterdam
       - EBMS_JDBC_URL=jdbc:postgresql://database:5432/ebms
       - EBMS_JDBC_USERNAME=${EBMS_JDBC_USERNAME}
@@ -110,14 +123,17 @@ services:
         aliases:
           - ebms-admin
     depends_on:
-      - database
-      - activemq
+      - ebms-database
+      - ebms-activemq
 
-  database:
+  ebms-database:
     image: ${OSDBK_IMAGE_REPOSITORY}/ebms-postgresql:${EBMS_POSTGRESQL_IMAGE_TAG}
     user: root
     privileged: true
     environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - LC_ALL=en_US.UTF-8
       - TZ=Europe/Amsterdam
       - POSTGRES_USER=${EBMS_JDBC_USERNAME}
       - POSTGRES_PASSWORD=${EBMS_JDBC_PASSWORD}
@@ -129,9 +145,12 @@ services:
         aliases:
           - ebms-database
 
-  activemq:
+  ebms-activemq:
     image: ${OSDBK_IMAGE_REPOSITORY}/activemq:${ACTIVEMQ_IMAGE_TAG}
     environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - LC_ALL=en_US.UTF-8
       - ACTIVEMQ_TMP=/tmp
     ports:
       - "8161:8161"
@@ -139,14 +158,17 @@ services:
     networks:
       ebms-core_network:
         aliases:
-          - activemq
+          - ebms-activemq
     depends_on:
-      - activemq-db
+      - ebms-activemq-db
     restart: always
 
-  activemq-db:
-    image: bitnami/postgresql:latest
+  ebms-activemq-db:
+    image: bitnami/postgresql:14
     environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - LC_ALL=en_US.UTF-8
       - TZ=Europe/Amsterdam
       - POSTGRESQL_USERNAME=${ACTIVEMQ_POSTGRESQL_USERNAME}
       - POSTGRESQL_PASSWORD=${ACTIVEMQ_POSTGRESQL_PASSWORD}
@@ -160,6 +182,9 @@ services:
   ebms-stub:
     image: ${OSDBK_IMAGE_REPOSITORY}/ebms-stub:${EBMS_STUB_IMAGE_TAG}
     environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - LC_ALL=en_US.UTF-8
       - SENDER_EBMS-BROKER_URL=http://ebms-core:8080/ebms
       - OTEL_TRACES_EXPORTER=jaeger
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
@@ -172,6 +197,9 @@ services:
   dgl-stub:
     image: ${OSDBK_IMAGE_REPOSITORY}/dgl-stub:${DGL_STUB_IMAGE_TAG}
     environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - LC_ALL=en_US.UTF-8
       - TZ=Europe/Amsterdam
       - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
       - SPRING_ACTIVEMQ_USER=${ACTIVEMQ_USER}
