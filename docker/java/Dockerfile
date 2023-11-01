@@ -9,7 +9,7 @@ RUN addgroup throttling && adduser -S -h /home/throttling -G throttling -u 1001 
 
 USER 1001
 
-COPY target/*.jar app.jar
+COPY --chown=throttling:throttling target/*.jar /opt/app/app.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java","-javaagent:opentelemetry-javaagent.jar","-XX:MaxRAMPercentage=70","-jar","/app.jar"]
+ENTRYPOINT ["java","-javaagent:opentelemetry-javaagent.jar","-XX:MaxRAMPercentage=70","-jar","/opt/app/app.jar"]
