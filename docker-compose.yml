@@ -56,7 +56,7 @@ services:
       - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
       - SPRING_ACTIVEMQ_USER=${JMS_CONSUMER_ACTIVEMQ_USER}
       - SPRING_ACTIVEMQ_PASSWORD=${JMS_CONSUMER_ACTIVEMQ_PASSWORD}
-      - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8080/ebms
+      - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8888/service/rest/v19/ebms/messages
       - CPA_SERVICE_URL=http://cpa-service:8080/cpa/find
       - THROTTLING_URL=http://throttling-service:8080/throttling
       - THROTTLING_ENABLED=true
@@ -84,7 +84,7 @@ services:
       - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
       - SPRING_ACTIVEMQ_USER=${JMS_PRODUCER_ACTIVEMQ_USER}
       - SPRING_ACTIVEMQ_PASSWORD=${JMS_PRODUCER_ACTIVEMQ_PASSWORD}
-      - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8080/ebms
+      - EBMS_MESSAGE_SERVICE_URL=http://ebms-core:8888/service/rest/v19/ebms/messages
       - OTEL_TRACES_EXPORTER=jaeger
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
       - OTEL_SERVICE_NAME=jms-producer
@@ -185,7 +185,7 @@ services:
       - LANG=en_US.UTF-8
       - LANGUAGE=en_US:en
       - LC_ALL=en_US.UTF-8
-      - SENDER_EBMS-BROKER_URL=http://ebms-core:8080/ebms
+      - SENDER_EBMS-BROKER_URL=http://ebms-core:8888/service/rest/v19/ebms/messages
       - OTEL_TRACES_EXPORTER=jaeger
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger-tracing:14250
       - OTEL_SERVICE_NAME=ebms-stub
