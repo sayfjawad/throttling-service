@@ -1,6 +1,52 @@
+# You can override the included template(s) by including variable overrides
+# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
+# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 include:
   - project: $BUILD_TEMPLATES_DIRECTORY
     file: $BUILD_FILE
+    rules:
+      - if: $CI_SERVER_URL == "https://gitlab.com"
+        when: never
+      - when: always
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
 
 variables:
   JDK_VERSION: "17"
+  #gitlab security
+  SAST_EXCLUDED_PATHS: spec,test,tests,tmp,target
+  SECURE_LOG_LEVEL: "debug"
+
+stages:
+  - maven_build
+  - maven_sonar
+  - maven_owasp
+  - maven_dependency_versions
+  - docker_build
+  - helm_uninstall
+  - helm_install_stubs
+  - helm_install
+  - helm_test
+  - deploy                      #gitlab-only
+  - test                        #shared
+
+deploy:
+  image: maven:3-openjdk-17
+  script:
+    - 'mvn deploy -s ci_settings.xml'
+  rules:
+    - if: $CI_SERVER_URL == "https://gitlab.com"
+
+sast:
+  stage: test
+  allow_failure: true
+
+dependency_scanning:
+  before_script:
+    - echo $MAVEN_SETTINGS > settings-lpc.xml
