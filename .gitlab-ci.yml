@@ -21,7 +21,8 @@ variables:
   JDK_VERSION: "17"
   #gitlab security
   SAST_EXCLUDED_PATHS: spec,test,tests,tmp,target
-  SECURE_LOG_LEVEL: "debug"
+#  SECURE_LOG_LEVEL: "debug"
+  CS_IMAGE: harbor.cicd-p-az1.l12m.nl/pgu/jms-producer:$TAG
 
 stages:
   - maven_build
