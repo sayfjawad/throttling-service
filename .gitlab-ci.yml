@@ -18,30 +18,47 @@ include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
 
 variables:
-  DOCKER_TAG: 1.12.3
+  DOCKERFILE: Dockerfile
+  DOCKER_TAG: 1.12.4-SNAPSHOT
   JDK_VERSION: "17"
   #gitlab security
   SAST_EXCLUDED_PATHS: spec,test,tests,tmp,target
 #  SECURE_LOG_LEVEL: "debug"
-  CS_IMAGE: harbor.cicd-p-az1.l12m.nl/pgu/throttling-service:$DOCKER_TAG
+  CS_IMAGE: registry.gitlab.com/logius/beveiligd-koppelvlak-extern/throttling-service:$DOCKER_TAG
 
 stages:
-  - maven_build
+  - maven_build                 #shared
   - maven_sonar
   - maven_owasp
   - maven_dependency_versions
-  - docker_build
-  - helm_uninstall
-  - helm_install_stubs
-  - helm_install
-  - helm_test
-  - deploy                      #gitlab-only
+  - docker_build                #shared
   - test                        #shared
 
-deploy:
+maven_build:
+  stage: maven_build
   image: maven:3-openjdk-17
   script:
     - 'mvn deploy -s ci_settings.xml'
+  rules:
+    - if: $CI_SERVER_URL == "https://gitlab.com"
+  artifacts:
+    paths:
+      - target/*
+    expire_in: 60 minutes
+
+docker_build:
+  stage: docker_build
+  image: docker:20.10.11-dind
+  services:
+    - name: docker:20.10.11-dind
+      alias: docker
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - docker build --pull -t $CS_IMAGE .
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker push $CS_IMAGE
   rules:
     - if: $CI_SERVER_URL == "https://gitlab.com"
 
