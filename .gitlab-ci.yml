@@ -19,7 +19,7 @@ include:
 
 variables:
   DOCKERFILE: Dockerfile
-  DOCKER_TAG: 1.12.4-SNAPSHOT
+  DOCKER_TAG: 1.12.4
   JDK_VERSION: "17"
   #gitlab security
   SAST_EXCLUDED_PATHS: spec,test,tests,tmp,target

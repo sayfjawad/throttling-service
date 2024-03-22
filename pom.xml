@@ -10,7 +10,7 @@
     </parent>
     <groupId>nl.logius.osdbk</groupId>
     <artifactId>throttling-service</artifactId>
-    <version>1.12.4-SNAPSHOT</version>
+    <version>1.12.4</version>
     <name>throttling-service</name>
     <description>OSDBK Throttling Service</description>
     
