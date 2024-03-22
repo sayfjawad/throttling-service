@@ -93,3 +93,20 @@ spring:
     user:
       name: changeit
       password: changeit
+~~~
+
+## Release notes
+See [NOTES][NOTES] for latest.
+
+[NOTES]: templates/NOTES.txt
+
+### Older release notes collated below:
+
+V Up to 1.12.3
+- Various improvements to:
+    - container technology
+    - use of base-images
+    - GITLAB Security scan framework implemented
+    - Improved Open Source build process and container releases
+    - Test improvements via docker-compose
+    - Dependency upgrades

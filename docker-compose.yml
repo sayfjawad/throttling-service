@@ -25,7 +25,7 @@ services:
 
   throttling-service:
     build:
-      dockerfile: docker/java/Dockerfile
+      dockerfile: Dockerfile
       context: .
     environment:
       - LANG=en_US.UTF-8

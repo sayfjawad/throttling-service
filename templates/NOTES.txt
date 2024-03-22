@@ -1,0 +1,3 @@
+﻿V 1.12.4
+- NOTES added as part of code to enrich installation process output
+- Query and semaphore optimization for team SWIFT to improve Throttling service performance in their environment
