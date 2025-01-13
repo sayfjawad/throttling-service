@@ -29,6 +29,7 @@ class ThrottlingConfigurationTest {
         afnemer2.setThrottleValue(5);
         afnemer2.setOin(oin2);
         afnemers.add(afnemer2);
+        // Wat moet deze test bewijzen??? Of is het enkel om een line coverage te realiseren!
         throttlingConfiguration.setAfnemers(afnemers);
         
         ThrottlingConfiguration.Afnemer afnemerForOin1 = throttlingConfiguration.getAfnemers().get(0);
