@@ -35,6 +35,5 @@ class ThrottlingConfigurationTest {
         ThrottlingConfiguration.Afnemer afnemerForOin2 = throttlingConfiguration.getAfnemers().get(1);
         assertEquals(afnemerForOin1, afnemer1);
         assertEquals(afnemerForOin2, afnemer2);
-        
     }
 }

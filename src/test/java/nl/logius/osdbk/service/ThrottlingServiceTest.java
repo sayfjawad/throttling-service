@@ -36,8 +36,8 @@ class ThrottlingServiceTest {
 
     @BeforeEach
     public void setup() {
-        List<ThrottlingConfiguration.Afnemer> afnemers = new ArrayList<>();
-        ThrottlingConfiguration.Afnemer afnemer = new ThrottlingConfiguration.Afnemer();
+        final var afnemers = new ArrayList<ThrottlingConfiguration.Afnemer>();
+        final var afnemer = new ThrottlingConfiguration.Afnemer();
         afnemer.setOin(oin);
         afnemer.setThrottleValue(10);
         afnemers.add(afnemer);
@@ -57,14 +57,16 @@ class ThrottlingServiceTest {
         boolean canSent = throttlingService.shouldAfnemerBeThrottled(oin);
 
         assertTrue(canSent);
-        verify(jdbcTemplate, times(1)).queryForObject("query1", parameters,Integer.class);
+        verify(jdbcTemplate, times(1))
+                .queryForObject("query1", parameters,Integer.class);
     }
 
     @Test
     void testNoCapacityAvailable() {
 
         int combinedRecordsCount = 16;
-        when(jdbcTemplate.queryForObject("query1", parameters,Integer.class)).thenReturn(combinedRecordsCount);
+        when(jdbcTemplate.queryForObject("query1", parameters,Integer.class))
+                .thenReturn(combinedRecordsCount);
 
         //test
         boolean canSent = throttlingService.shouldAfnemerBeThrottled(oin);
@@ -73,6 +75,25 @@ class ThrottlingServiceTest {
         verify(jdbcTemplate, times(1)).queryForObject("query1", parameters,Integer.class);
     }
 
+    /**
+     * Tests the scenario where an afnemer (client) is not configured for throttling.
+     *
+     * This test verifies the behavior of the {@code shouldAfnemerBeThrottled} method
+     * when a valid OIN (Organisatie Identificatie Nummer) that is not part of the
+     * throttling configuration list is provided as an argument.
+     *
+     * The expected result is that the method allows the message to be sent,
+     * returning {@code true}. Additionally, the method should not query the database
+     * for any throttling-related information.
+     *
+     * Assertions:
+     * - The method returns {@code true} when the afnemer is not configured for throttling.
+     * - The database query related to throttling is not executed.
+     *
+     * Mocks and Verifications:
+     * - Ensures that the {@code queryForObject} method of {@code jdbcTemplate}
+     *   is not invoked.
+     */
     @Test
     void testAfnemerNotConfiguredForThrottling() {
 
@@ -80,6 +101,7 @@ class ThrottlingServiceTest {
         boolean canSent = throttlingService.shouldAfnemerBeThrottled("12345");
 
         assertTrue(canSent);
-        verify(jdbcTemplate, times(0)).queryForObject("query1", parameters,Integer.class);
+        verify(jdbcTemplate, times(0))
+                .queryForObject("query1", parameters,Integer.class);
     }
 }

@@ -1,6 +1,7 @@
 package nl.logius.osdbk.controller;
 
 import nl.logius.osdbk.service.ThrottlingService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -35,6 +36,12 @@ class ThrottlingControllerTest {
     private final String username = "changeit";
     private final String password = "changeit";
 
+    // fun part
+    @DisplayName(""" 
+            Given a throttling request for a specific CPA,
+            when the throttling service is called,
+            then it should return true and verify the service interaction once.
+            """)
     @Test
     void getAmountOfPendingTasksForCpa() throws Exception {
         Mockito.when(throttlingService.shouldAfnemerBeThrottled(anyString())).thenReturn(Boolean.TRUE);
@@ -55,7 +62,7 @@ class ThrottlingControllerTest {
 
         verify(throttlingService, times(0)).shouldAfnemerBeThrottled(anyString());
     }
-    
+
      private HttpHeaders createHeadersWithBasicAuth(String username, String password) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBasicAuth(username, password);
