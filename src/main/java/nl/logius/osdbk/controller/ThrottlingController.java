@@ -25,7 +25,7 @@ public class ThrottlingController {
         if(afnemerOin.isBlank()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No afnemerOin provided");
         }
-        // the fun part
+
         return throttlingService.shouldAfnemerBeThrottled(afnemerOin);
     }
 

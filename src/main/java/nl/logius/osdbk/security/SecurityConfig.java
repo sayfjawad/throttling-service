@@ -16,9 +16,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors()
-                // the fun part
-                .configurationSource(request -> {
+        http.cors().configurationSource(request -> {
                     var cors = new CorsConfiguration();
                     cors.setAllowedOrigins(List.of("*"));
                     cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

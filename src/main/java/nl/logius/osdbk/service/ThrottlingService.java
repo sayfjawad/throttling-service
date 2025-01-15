@@ -66,10 +66,8 @@ public class ThrottlingService {
             Map<String, String> parameters = Collections.singletonMap("afnemerOin", OIN_PREFIX + afnemerOin);
             count  = jdbcTemplate.queryForObject(combinedCountSQL, parameters, Integer.class);
         } catch (DataAccessException e) {
-            // the fun part
             logger.error("DataAccessException occurred while querying database", e);
         } catch (Exception e) {
-            // the fun part
             logger.error("Exception occurred while executing getCombinedMessageCount", e);
         }
         return count;
